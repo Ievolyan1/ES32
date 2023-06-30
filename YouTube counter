@@ -1,0 +1,41 @@
+#include <WiFi.h>
+#include <HTTPClient.h>
+
+const char* ssid = "YourWiFiSSID";
+const char* password = "YourWiFiPassword";
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+  
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to WiFi...");
+  }
+  
+  Serial.println("Connected to WiFi");
+}
+
+void loop() {
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    String url = "https://www.googleapis.com/youtube/v3/channels?part=statistics&id=YOUR_CHANNEL_ID&key=YOUR_API_KEY";
+    
+    http.begin(url);
+    int httpCode = http.GET();
+    
+    if (httpCode > 0) {
+      if (httpCode == HTTP_CODE_OK) {
+        String payload = http.getString();
+        Serial.println(payload);
+        // Add code here to process the YouTube API response and extract subscriber information
+      }
+    } else {
+      Serial.printf("HTTP request failed with error code: %s\n", http.errorToString(httpCode).c_str());
+    }
+    
+    http.end();
+  }
+  
+  delay(60000); // Delay 1 minute between requests
+}
